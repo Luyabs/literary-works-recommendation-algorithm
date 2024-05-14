@@ -1,0 +1,6 @@
+mysql:
+  host: 'localhost'
+  port: 3306
+  user: 'root'
+  password: 'THIS_IS_YOUR_PASSWORD'
+  database: 'literary_works_recommendation_platform'

@@ -115,10 +115,10 @@ def delete_not_exist_books_rating(mysql):
 
 if __name__ == '__main__':
     mysql = mysql_connector_keep_alive.MysqlConnectorKeepAlive()
-    # load_book_data(mysql_connector)
-    # load_user_data(mysql_connector)
-    # load_rating_data_to_review(mysql_connector)
-    # load_rating_data_to_work(mysql_connector)
-    # delete_not_exist_books_rating(mysql_connector)
+    load_book_data(mysql)
+    load_user_data(mysql)
+    load_rating_data_to_review(mysql)
+    load_rating_data_to_work(mysql)
+    delete_not_exist_books_rating(mysql)
     load_tags(mysql)
     mysql.close()

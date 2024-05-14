@@ -1,0 +1,8 @@
+1. 发现数据问题: 已有数据集中共70704文学作品 select count(*) from work,
+   但评分数据集中出现了80010件作品 select count(distinct review_user_work.work_id) from review_user_work;
+2. 去除没出现在bookdata中的所有"不存在"作品的评分记录
+    delete from review_user_work ruw
+    where not exists(
+        select w.work_id from work w
+        where w.work_id = ruw.work_id
+    );

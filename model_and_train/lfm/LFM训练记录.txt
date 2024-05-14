@@ -1,0 +1,58 @@
+# lfm_model_adamW_mse_dim=80_epoch=30.pth
+AdamW MSELoss dim=80 max_norm=2 batch_size=1024 lr=0.001
+[5 epoch]
+测试集上的平均MSE Loss: 1.9136912386128857
+测试集上的平均MAE Loss: 1.1455616430871804
+测试集上的准确率Accuracy: 0.30297074044585987
+[10 epoch]
+测试集上的平均MSE Loss: 1.0936096640908795
+测试集上的平均MAE Loss: 0.8295582485426763
+测试集上的准确率Accuracy: 0.45497860270700635
+[15 epoch]
+测试集上的平均MSE Loss: 0.9118116794118456
+测试集上的平均MAE Loss: 0.7507138461064381
+测试集上的准确率Accuracy: 0.5150558568869427
+[20 epoch] lr->0.0002
+测试集上的平均MSE Loss: 0.8804823036786098
+测试集上的平均MAE Loss: 0.7357799247571617
+测试集上的准确率Accuracy: 0.5279626542595541
+[25 epoch] batch_size->128
+测试集上的平均MSE Loss: 0.8414867278634076
+测试集上的平均MAE Loss: 0.7198807009431925
+测试集上的准确率Accuracy: 0.5369100129585327
+[30 epoch] lr->0.0001
+测试集上的平均MSE Loss: 0.8257401876591229
+测试集上的平均MAE Loss: 0.7128351597290671
+测试集上的准确率Accuracy: 0.5413395883173844
+
+
+# lfm_model_adamW_mse_dim=160_epoch=18.pth
+AdamW MSELoss dim=160 max_norm=2 batch_size=512 lr=0.001
+[10 epoch]
+测试集上的平均MSE Loss: 0.8293303059238756
+测试集上的平均MAE Loss: 0.7180438800291582
+测试集上的准确率Accuracy: 0.525474730861244
+[18 epoch] lr->0.0005 batch_size->256
+测试集上的平均MSE Loss: 0.7451367071180632
+测试集上的平均MAE Loss: 0.67796385920409
+测试集上的准确率Accuracy: 0.5612166068580542
+
+
+# lfm_model_adamW_mse_dim=240_epoch=20.pth
+AdamW MSELoss dim=240 max_norm=2 batch_size=256 lr=0.001
+[5 epoch]
+测试集上的平均MSE Loss: 0.8732661572084472
+测试集上的平均MAE Loss: 0.7427539014074791
+测试集上的准确率Accuracy: 0.49424965111642744
+[10 epoch]
+测试集上的平均MSE Loss: 0.7537095576192013
+测试集上的平均MAE Loss: 0.685061074520032
+测试集上的准确率Accuracy: 0.5546345444577353
+[15 epoch] lr->0.0002
+测试集上的平均MSE Loss: 0.7042138808937164
+测试集上的平均MAE Loss: 0.6581293728553127
+测试集上的准确率Accuracy: 0.5726238536682615
+[20 epoch] lr->0.0001
+测试集上的平均MSE Loss: 0.6958358599143355
+测试集上的平均MAE Loss: 0.6533453258696165
+测试集上的准确率Accuracy: 0.5792931369617225

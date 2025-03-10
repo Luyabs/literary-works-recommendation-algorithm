@@ -3,6 +3,9 @@
 2. 业务后端 https://github.com/Luyabs/literary-works-recommendation-backend
 3. `你在这` 算法端 https://github.com/Luyabs/literary-works-recommendation-algorithm
 
+## 前言
+本项目为基于数据库技术的在线更新图书推荐系统（算法部分），算法部分基于矩阵分解模型、因子分解机和深度学习模型实现。
+
 ## 项目环境
 > Python: 3.9  (至少是Python 3)    
 > MySQL：8.0  
@@ -20,17 +23,19 @@ mysql:
   database: 'literary_works_recommendation_platform'
 ```
 2. 数据库导入：通过SQL文件在数据库中创建数据表 literary_works_recommendation_platform.sql
-3. 运行**算法后端**：运行文件 controller/recommed_controller.py
-4. 将数据导入数据库：运行文件 raw_data/save_into_db.py
-5. 运行爬虫扩展数据：运行文件 raw_data/crawler.py  
+3. **2种数据库创建方式：** ***1. <`推荐`直接使用SQL文件运行创建>*** ***[点我下载(百度云)](https://pan.baidu.com/s/1jqdbz_LgSQe8Da-3Yu34yg?pwd=6666)***  ***2. <基于Python从dat文件导入数据库并用爬虫扩展>*** 将数据导入数据库：运行文件 raw_data/save_into_db.py; `(如果不想获取图书封面和简介信息可不运行爬虫；爬虫运行会受豆瓣反爬限制，需要多爬几次)`运行爬虫扩展数据：运行文件 raw_data/crawler.py
+4. **2种模型参数获取方式：** ***1. <`推荐`直接在model_and_train目录下训练模型，自己调整模型结构和炼丹>*** ***2. <[点我获取训练好的模型参数(百度云)](https://pan.baidu.com/s/1jqdbz_LgSQe8Da-3Yu34yg?pwd=6666): 导入到model_params目录下 >*** 
+5. `(如果不想更换controller的模型可跳过)` controller默认使用lfm做召回模型、fm做精排模型，如果准备替换自行修改代码
+6. `(如果不使用新模型可跳过)` 将BERT权重文件下载导入到model_and_train/multi_feature_fm/base_bert_chinese目录下， ***[点击下载BERT权重文件(hugging_face)](https://huggingface.co/google-bert/bert-base-chinese/blob/main/pytorch_model.bin)***
+7. 运行**算法后端**：运行文件 controller/recommed_controller.py
 
 ## 项目结构
 1. controller：由Flask实现的简易后端  
 2. mapper：封装与数据库进行交互的函数工具类  
 3. model_and_train：含模型(deep_fm, fm, lfm)文件(xxx_model.py)，训练、测试(数据集与top-k测试)、预测、召回文件(xxx_trainer_and_predictor.py)与对数据库索引映射到从0开始的自然数文件(id_mapping.py)
-4. model_params: 模型参数保存位置，由于模型参数过大，不便上传，可以自行训练或联系我获取
+4. model_params: 模型参数保存位置，每个模型参数约300MB，放到云盘自行下载 ***[点我获取训练好的模型参数(百度云)](https://pan.baidu.com/s/1jqdbz_LgSQe8Da-3Yu34yg?pwd=6666)***
 5. mysql_connector: 对pymysql进行封装，通过config.yaml进行配置
-6. raw_data: 存放预处理后的数据集(原数据集：豆瓣图书数据集 https://aistudio.baidu.com/datasetdetail/7492 )，将数据集导入导数据库的文件(save_into_db.py)与通过爬虫扩充数据的文件(crawler.py)
+6. raw_data: 存放预处理后的数据集(原数据集：***[豆瓣图书数据集](https://aistudio.baidu.com/datasetdetail/7492)***，将数据集导入导数据库的文件(save_into_db.py)与通过爬虫扩充数据的文件(crawler.py)
 
 ## 项目整体架构
 ![image](https://github.com/Luyabs/literary-works-recommendation-backend/assets/74538732/a3344555-7c3e-498e-a794-06a25da84354)

@@ -247,8 +247,8 @@ class DeepFmSystem(BaseDeepLearningSystem):
 
 if __name__ == '__main__':
     deep_fm_system = DeepFmSystem()
-    # deep_fm_system.train(dataloader=deep_fm_system.train_dataloader)
-    # deep_fm_system.test(dataloader=deep_fm_system.test_dataloader)
-    for k in [10, 20, 50, 100, 200, 500, 1000, 2000]:
-        print(f'=========== k: {k} ===========')
-        deep_fm_system.test_top_k(min_rating_num=50, k=k, threshold=4.0)
+    deep_fm_system.train(dataloader=deep_fm_system.train_dataloader)
+    # # deep_fm_system.test(dataloader=deep_fm_system.test_dataloader)
+    # for k in [10, 20, 50, 100, 200, 500, 1000, 2000]:
+    #     print(f'=========== k: {k} ===========')
+    #     deep_fm_system.test_top_k(min_rating_num=50, k=k, threshold=4.0)

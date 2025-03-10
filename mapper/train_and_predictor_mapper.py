@@ -30,3 +30,29 @@ def select_user_having_ratings_greater_equal(min_rating_num):
         """
     )
     return results
+
+def select_introduction_by_seq_work_id(seq_id):
+    """
+    通过work_id查询文学作品的简介
+    :param seq_id: 经Embedding后的文学作品id （行号）
+    :return: column0 = introduction
+    """
+    mysql = mysql_connector.MysqlConnector()
+    results = mysql.dql(f"""
+        select introduction from work LIMIT {seq_id}, 1
+        """
+    )
+    return results
+
+def select_tag_text_by_seq_work_id(seq_id):
+    """
+    通过work_id查询文学作品的标签文本
+    :param seq_id: 经Embedding后的文学作品id （行号）
+    :return: column0 = tag_text
+    """
+    mysql = mysql_connector.MysqlConnector()
+    results = mysql.dql(f"""
+        select tags from work LIMIT {seq_id}, 1
+        """
+    )
+    return results

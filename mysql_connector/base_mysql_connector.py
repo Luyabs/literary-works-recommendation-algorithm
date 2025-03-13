@@ -49,7 +49,7 @@ class BaseMysqlConnector:
 
 
     '''读取json配置文件'''
-    def __read_mysql_config_json__(self, file_name='db_config.json'):
+    def __read_mysql_config__(self, file_name='db_config.json'):
         current_dir = os.path.dirname(__file__)
         project_dir = os.path.abspath(os.path.join(current_dir, '../utils', '..'))
         file_dir = os.path.join(project_dir, file_name)

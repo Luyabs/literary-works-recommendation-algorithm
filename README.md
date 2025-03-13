@@ -9,12 +9,25 @@
 ## 项目环境
 > Python: 3.9  (至少是Python 3)    
 > MySQL：8.0  
-> 依赖：numpy, torch, pandas, pymysql, yaml, tqdm，如果没有安装直接装最新版
+> 依赖：numpy, torch, pandas, pymysql, tqdm, transformers(来自huggingface, 如不使用该模型跳过)；如果没有安装直接装最新版
 
 ## 项目运行
-1. **启动前配置**: 在本项目中你需要在项目的根目录中创建一个数据库配置文件，文件名：config.yaml
+1. **启动前配置**: 在本项目中你需要在项目的最外层根目录中创建一个数据库配置文件，文件名：db-config.json
+```json
+// 这是新版文件配置内容 db-config.json
+{
+  "mysql": {
+    "host": "localhost",   // 你的MySQL地址 [需更改 本地运行的数据库不用改]
+    "port": 3306,          // 你的MySQL端口 [需更改 但大概率是3306]
+    "user": "root",        // 你的MySQL用户名 [需更改 但大概率是root]
+    "password": "PASSSSSSSSWORD",    // 你的MySQL密码 [需更改]
+    "database": "literary_works_recommendation_platform"  // 需要创建一个同名database!
+  }
+}
+```
+> 以下是旧版配置文件，使用yaml，该库不怎么支持Linux环境，故更换为上方json配置，如果要保留旧版配置文件，请自行修改base_mysql_connector.py文件：
 ```yaml
-# 这是文件内容
+# 这是文件内容 config.yaml
 mysql:
   host: 'localhost'  # 你的MySQL地址 [需更改 本地运行的数据库不用改]
   port: 3306   # 你的MySQL端口 [需更改 但大概率是3306]
@@ -22,9 +35,9 @@ mysql:
   password: 'PASSSSSSSSWORD'  # 你的MySQL密码 [需更改]
   database: 'literary_works_recommendation_platform'
 ```
-2. 数据库导入：通过SQL文件在数据库中创建数据表 literary_works_recommendation_platform.sql
+2. 数据库导入：先创建叫literary_works_recommendation_platform的数据库，再运行literary_works_recommendation_platform.sql
 3. **2种数据库创建方式：** ***1. <`推荐`直接使用SQL文件运行创建>*** ***[点我下载(百度云)](https://pan.baidu.com/s/1jqdbz_LgSQe8Da-3Yu34yg?pwd=6666)***  ***2. <基于Python从dat文件导入数据库并用爬虫扩展>*** 将数据导入数据库：运行文件 raw_data/save_into_db.py; `(如果不想获取图书封面和简介信息可不运行爬虫；爬虫运行会受豆瓣反爬限制，需要多爬几次)`运行爬虫扩展数据：运行文件 raw_data/crawler.py
-4. **2种模型参数获取方式：** ***1. <`推荐`直接在model_and_train目录下训练模型，自己调整模型结构和炼丹>*** ***2. <[点我获取训练好的模型参数(百度云)](https://pan.baidu.com/s/1jqdbz_LgSQe8Da-3Yu34yg?pwd=6666): 导入到model_params目录下 >*** 
+4. **2种模型参数获取方式：** ***1. <`推荐`直接在model_and_train目录下训练模型，自己调整模型结构和炼丹>*** ***2. <[点我获取训练好的模型参数(百度云)](https://pan.baidu.com/s/1jqdbz_LgSQe8Da-3Yu34yg?pwd=6666): 导入到model_params目录下>*** 
 5. `(如果不想更换controller的模型可跳过)` controller默认使用lfm做召回模型、fm做精排模型，如果准备替换自行修改代码
 6. `(如果不使用新模型可跳过)` 将BERT权重文件下载导入到model_and_train/multi_feature_fm/base_bert_chinese目录下， ***[点击下载BERT权重文件(hugging_face)](https://huggingface.co/google-bert/bert-base-chinese/blob/main/pytorch_model.bin)***
 7. 运行**算法后端**：运行文件 controller/recommed_controller.py

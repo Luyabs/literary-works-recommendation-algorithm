@@ -60,6 +60,10 @@ mysql:
 ![image](https://github.com/Luyabs/literary-works-recommendation-algorithm/assets/74538732/fc0ead24-dec2-4b6b-84a9-d162a572da39)
 ![image](https://github.com/Luyabs/literary-works-recommendation-algorithm/assets/74538732/eeaa8d8f-0ba1-4514-b1d0-9030d9404777)
 ![image](https://github.com/Luyabs/literary-works-recommendation-algorithm/assets/74538732/67a85b5f-bb25-44f4-b43e-697ad59ff24d)
+- 新模型在DeepFM的基础上增加了对文学作品简介（Introduction属性）的语义特征提取；并增加了标签经BERT的语义表示和标签离散化ID表示的Embedding编码的对比学习：
+![图片2](https://github.com/user-attachments/assets/874942be-209a-43ec-b82b-649f4933962b)
+![fea_extraction](https://github.com/user-attachments/assets/e6ecd1ee-6ae0-46d5-afa5-2706a0ab3e1a)
+
 
 ## 混合推荐算法流程
 1.	设置用户Id：user_id，推荐数量k，评分最低阈值threshold，混合权重mix_weight

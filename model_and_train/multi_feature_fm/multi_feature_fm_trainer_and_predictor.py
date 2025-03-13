@@ -1,8 +1,10 @@
 import os
-from typing import Any
+import sys
+from typing import Any, List, Tuple
 
 import torch
 import torch.nn as nn
+from tqdm import tqdm
 from transformers import AutoTokenizer
 
 from mapper.train_and_predictor_mapper import select_tag_text_by_seq_work_id, select_introduction_by_seq_work_id
@@ -13,9 +15,9 @@ from model_and_train.multi_feature_fm.mult_feature_fm import MultiFeatureFM
 
 
 class MultiFeatureFMSystem(BaseDeepLearningSystem):
-    def __init__(self, train_ratio=0.9, dim=80, lr=0.0001, batch_size=256, epochs=5,
+    def __init__(self, bert_version, train_ratio=0.9, dim=80, lr=0.0001, batch_size=256, epochs=5,
                  params_saved_path=os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')),
-                                                'model_params', 'deep_fm_model_adamW_mae_dim=80_epoch=20.pth')):
+                                                'model_params', 'multif_feature_fm_model_adamW_mae_dim=80_epoch=20.pth')):
         print('### 正在初始化MultiFeatureFM算法 ###')
         super().__init__(train_ratio, lr, batch_size, epochs, params_saved_path)
 
@@ -23,14 +25,14 @@ class MultiFeatureFMSystem(BaseDeepLearningSystem):
         self.id_mapping, n_users, _, n_tags = self.__get_id_mapping__()
 
         # 预训练 BERT tokenizer
-        self.tokenizer = AutoTokenizer.from_pretrained('base_bert_chinese')
+        self.tokenizer = AutoTokenizer.from_pretrained(bert_version)
 
         # 数据集加载 (这些数据集不用于update_train, 仅用于初始train与test)
         self.train_dataloader, self.test_dataloader = self.__get_train_and_test_dataloader__()
 
         # 模型 + 加载参数
         self.dim = dim
-        self.model = MultiFeatureFM(n_users, n_tags, dim).to(self.device)
+        self.model = MultiFeatureFM(n_users, n_tags, dim, bert_version).to(self.device)
         self.__load_model_parameters__(self.model)
 
         # 损失函数和优化器
@@ -65,7 +67,7 @@ class MultiFeatureFMSystem(BaseDeepLearningSystem):
         return tag_ids
 
     '''通过 book_id 加载 book_tags'''
-    def __get_tags_by_book_id__(self, book_ids: torch.Tensor) -> list[Any]:
+    def __get_tags_by_book_id__(self, book_ids: torch.Tensor) -> List[Any]:
         """
         通过 book_id 加载 book_tags
         :param book_id: 书本id 张量 shape = [batch_size]
@@ -82,7 +84,7 @@ class MultiFeatureFMSystem(BaseDeepLearningSystem):
         return tags
 
     '''通过 book_id 加载 book_introduction'''
-    def __get_introduction_by_book_id__(self, book_ids: torch.Tensor) -> list[Any]:
+    def __get_introduction_by_book_id__(self, book_ids: torch.Tensor) -> List[Any]:
         """
         通过 book_id 加载 book_introduction
         """
@@ -104,7 +106,7 @@ class MultiFeatureFMSystem(BaseDeepLearningSystem):
         :param dataloader: 如果不指定将使用本类的成员变量 self.train_dataloader
         :return: 无
         """
-        print('DeepFM 开始训练')
+        print('MultiFeatureFM 开始训练')
 
         if model is None:
             model = self.model
@@ -145,61 +147,77 @@ class MultiFeatureFMSystem(BaseDeepLearningSystem):
                 if (batch_idx + 1) % 100 == 0:
                     print(f'Epoch [{epoch + 1}/{self.epochs}], Step [{batch_idx + 1}/{len(dataloader)}], Loss: {round(loss.item(), 4)}')
             self.__save_model_parameters__(model, epoch)
-        print("DeepFM 训练完成!")
+        print("MultiFeatureFM 训练完成!")
 
-    # '''测试模型'''
-    # def test(self, model=None, dataloader=None) -> tuple[float, float, float, float, float]:
-    #     """
-    #     测试模型
-    #     :param model: 如果不指定将使用本类的成员变量 self.model
-    #     :param dataloader: 如果不指定将使用本类的成员变量 self.test_dataloader
-    #     """
-    #     print('DeepFM 开始测试')
-    #     model = self.model if model is None else model
-    #     dataloader = self.test_dataloader if dataloader is None else dataloader
-    #
-    #     self.model.eval()
-    #     total_size = len(dataloader) * dataloader.batch_size
-    #     bce_loss = 0
-    #     mae_loss = 0
-    #     accuracy = 0
-    #
-    #     true_pos = 0
-    #     prediction = 0
-    #     pos = 0
-    #
-    #     with torch.no_grad():
-    #         for batch_idx, (user, book, rating) in enumerate(dataloader):
-    #             user = user.long().to(self.device)
-    #             tags = self.__get_tags_by_book_id__(book).to(self.device)
-    #             click = torch.where(rating >= 4, 1.0, 0.0).to(self.device)  # 评分 ≥ 4 认为会点击 即 accuracy = 0.1
-    #
-    #             click_hat = model(user, tags)  # 前向传播
-    #             loss = self.criterion(click_hat, click)  # 计算损失
-    #
-    #             # 预估点击率 ≥ 0.5 视为会击, accuracy 统计rating_hat与rating是否一致
-    #             accuracy += ((click_hat >= 0.5) == (click == 1.0)).sum().item()
-    #             bce_loss += loss.item()
-    #             mae_loss += abs(click_hat - click).sum().item()
-    #
-    #             # 计算混淆矩阵元素
-    #             true_pos += ((click_hat >= 0.5) & (click == 1.0)).sum().item()  # TP 该batch中预测正确的正例
-    #
-    #             prediction += (click_hat >= 0.5).sum().item()  # 模型的预测结果Prediction  该batch中预测的正例 Prediciton = TP + FP
-    #             pos += (click == 1.0).sum().item()  # P 该batch全部的正例 P = TP + FN
-    #
-    #     bce_loss /= len(dataloader)  # MSE Loss 用于训练时损失函数
-    #     mae_loss /= total_size  # MAE Loss 用于直观反馈数据预测偏差
-    #     accuracy /= total_size
-    #     precision = true_pos / prediction if prediction > 0 else 0  # Precision 准确率 = TP / Prediction = TP / (TP + FP)
-    #     recall = true_pos / pos if pos > 0 else 0  # Recall 召回率 = TP / P = TP / (TP + FN)
-    #     print(f"测试集上的平均BCE Loss: {bce_loss}")
-    #     print(f"测试集上的平均MAE Loss: {mae_loss}")
-    #     print(f"测试集上的准确率Accuracy: {accuracy}")
-    #     print(f"测试集上的精确率Precision: {precision}")
-    #     print(f"测试集上的召回率Recall: {recall}")
-    #     print("DeepFM 测试完成!")
-    #     return bce_loss, mae_loss, accuracy, precision, recall
+    '''测试模型'''
+    def test(self, model=None, dataloader=None) -> Tuple[float, float, float, float, float]:
+        """
+        测试模型
+        :param model: 如果不指定将使用本类的成员变量 self.model
+        :param dataloader: 如果不指定将使用本类的成员变量 self.test_dataloader
+        """
+        print('DeepFM 开始测试')
+        model = self.model if model is None else model
+        dataloader = self.test_dataloader if dataloader is None else dataloader
+
+        self.model.eval()
+        total_size = len(dataloader) * dataloader.batch_size
+        bce_loss = 0
+        mae_loss = 0
+        accuracy = 0
+
+        true_pos = 0
+        prediction = 0
+        pos = 0
+
+        with torch.no_grad():
+            for batch_idx, (user, book, rating) in tqdm(enumerate(dataloader)):
+                # 处理三元组信息
+                user = user.long().to(self.device)
+                tag_ids = self.__get_tag_ids_by_book_id__(book).to(self.device)
+                click = torch.where(rating >= 4, 1.0, 0.0).to(self.device)  # 评分 ≥ 4 认为会点击
+
+                # 获取书本描述 & 标签文本
+                raw_introduction = self.__get_introduction_by_book_id__(book)
+                raw_tags = self.__get_tags_by_book_id__(book)
+
+                # 对书本描述进行 BERT 预处理
+                introduction_tokens = self.preprocess_text(raw_introduction)
+                introduction_input = introduction_tokens["input_ids"].to(self.device)
+                introduction_mask = introduction_tokens["attention_mask"].to(self.device)
+
+                # 对标签文本进行 BERT 预处理
+                tags_tokens = self.preprocess_text(raw_tags)
+                tags_input = tags_tokens["input_ids"].to(self.device)
+                tags_mask = tags_tokens["attention_mask"].to(self.device)
+                click_hat, contrastive_loss = model(user, tag_ids, introduction_input, introduction_mask , tags_input, tags_mask)  # 前向传播
+                pred_loss = self.criterion(click_hat, click) # 计算损失
+                loss = 0.5 * pred_loss + 0.5 * contrastive_loss
+
+
+                # 预估点击率 ≥ 0.5 视为会击, accuracy 统计rating_hat与rating是否一致
+                accuracy += ((click_hat >= 0.5) == (click == 1.0)).sum().item()
+                bce_loss += loss.item()
+                mae_loss += abs(click_hat - click).sum().item()
+
+                # 计算混淆矩阵元素
+                true_pos += ((click_hat >= 0.5) & (click == 1.0)).sum().item()  # TP 该batch中预测正确的正例
+
+                prediction += (click_hat >= 0.5).sum().item()  # 模型的预测结果Prediction  该batch中预测的正例 Prediciton = TP + FP
+                pos += (click == 1.0).sum().item()  # P 该batch全部的正例 P = TP + FN
+
+        bce_loss /= len(dataloader)  # MSE Loss 用于训练时损失函数
+        mae_loss /= total_size  # MAE Loss 用于直观反馈数据预测偏差
+        accuracy /= total_size
+        precision = true_pos / prediction if prediction > 0 else 0  # Precision 准确率 = TP / Prediction = TP / (TP + FP)
+        recall = true_pos / pos if pos > 0 else 0  # Recall 召回率 = TP / P = TP / (TP + FN)
+        print(f"测试集上的平均BCE Loss: {bce_loss}")
+        print(f"测试集上的平均MAE Loss: {mae_loss}")
+        print(f"测试集上的准确率Accuracy: {accuracy}")
+        print(f"测试集上的精确率Precision: {precision}")
+        print(f"测试集上的召回率Recall: {recall}")
+        print("MultiFeatureFM 测试完成!")
+        return bce_loss, mae_loss, accuracy, precision, recall
     #
     # '''增量训练'''
     # def update_train(self, newly_update_time: str) -> None:
@@ -297,19 +315,20 @@ class MultiFeatureFMSystem(BaseDeepLearningSystem):
             state_dict = checkpoint['model']
             model.users_embedding.weight.data[:len(state_dict['users_embedding.weight'])] = state_dict['users_embedding.weight']
             model.tags_embedding.weight.data[:len(state_dict['tags_embedding.weight'])] = state_dict['tags_embedding.weight']
+            model.text_fc.weight.data[:len(state_dict['text_fc.weight'])] = state_dict['text_fc.weight']
             mlp_layers = list(model.mlp.children())   # 给 mlp 中的每层线性层分别赋值
             for i, layer in enumerate(mlp_layers):
                 if isinstance(layer, nn.Linear):
                     # 赋值权重和偏置
                     model.mlp[i].weight.data = state_dict['mlp.' + str(i) + '.weight']
                     model.mlp[i].bias.data = state_dict['mlp.' + str(i) + '.bias']
-        print('DeepFM 已加载模型参数') if os.path.exists(self.params_saved_path) else print('DeepFM 无已保存的模型参数')
+        print('MultiFeatureFM 已加载模型参数') if os.path.exists(self.params_saved_path) else print('MultiFeatureFM 无已保存的模型参数')
 
 
 if __name__ == '__main__':
-    multi_feature_fm_system = MultiFeatureFMSystem()
-    multi_feature_fm_system.train(dataloader=multi_feature_fm_system.train_dataloader)
-    # # deep_fm_system.test(dataloader=deep_fm_system.test_dataloader)
+    multi_feature_fm_system = MultiFeatureFMSystem(bert_version='base_bert_chinese')
+    # multi_feature_fm_system.train(dataloader=multi_feature_fm_system.train_dataloader)
+    multi_feature_fm_system.test(dataloader=multi_feature_fm_system.test_dataloader)
     # for k in [10, 20, 50, 100, 200, 500, 1000, 2000]:
     #     print(f'=========== k: {k} ===========')
     #     deep_fm_system.test_top_k(min_rating_num=50, k=k, threshold=4.0)

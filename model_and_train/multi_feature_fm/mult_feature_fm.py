@@ -5,7 +5,7 @@ from transformers import BertModel
 
 
 class MultiFeatureFM(nn.Module):
-    def __init__(self, n_users, n_item_tags, dim):
+    def __init__(self, n_users, n_item_tags, dim, bert_version):
         super(MultiFeatureFM, self).__init__()
 
         # Embedding 层
@@ -13,7 +13,7 @@ class MultiFeatureFM(nn.Module):
         self.tags_embedding = nn.Embedding(n_item_tags, dim, max_norm=2)
 
         # BERT (冻结参数）
-        self.bert_encoder = BertModel.from_pretrained('base_bert_chinese')
+        self.bert_encoder = BertModel.from_pretrained(bert_version, local_files_only=True)
         for param in self.bert_encoder.parameters():
             param.requires_grad = False  # 冻结 BERT
 
@@ -42,6 +42,7 @@ class MultiFeatureFM(nn.Module):
         features_emb = features_emb.reshape([features_emb.shape[0], -1])  # shape: [batch_size, 3 * dim]
         output = self.mlp(features_emb)
         return torch.squeeze(output)
+
 
     def encode_text(self, input_ids, attention_mask):
         """ 用 BERT 提取文本特征 """

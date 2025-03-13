@@ -4,6 +4,7 @@ import threading
 
 import torch
 import torch.nn as nn
+from typing import Tuple
 
 from model_and_train.base_trainer_and_predictor import BaseDeepLearningSystem
 from model_and_train.dataset.rating_dataset import RatingDataset
@@ -87,7 +88,7 @@ class FmSystem(BaseDeepLearningSystem):
         print("FM 训练完成!")
 
     '''测试模型'''
-    def test(self, model=None, dataloader=None) -> tuple[float, float, float, float, float]:
+    def test(self, model=None, dataloader=None) -> Tuple[float, float, float, float, float]:
         """
         测试模型
         :param model: 如果不指定将使用本类的成员变量 self.model
@@ -212,7 +213,7 @@ class FmSystem(BaseDeepLearningSystem):
         return recall_list
 
     '''top_k测试 基于预测结果的(全负)召回率与准确率测试'''
-    def test_top_k(self, min_rating_num: int = 200, k: int = 100, threshold: float = 4.0) -> tuple[float, float, float]:
+    def test_top_k(self, min_rating_num: int = 200, k: int = 100, threshold: float = 4.0) -> Tuple[float, float, float]:
         """
         :param min_rating_num: 最小发表的评价数量
         :param k: 选取k个作为推荐(召回)结果

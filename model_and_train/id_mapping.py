@@ -41,7 +41,7 @@ class IdMapping:
                 data['book_id'] = data['book_id'].map(self.book_id_map)
         return data
 
-    def mapping_ids(self, user_ids: list, book_ids: list) -> tuple[list, list]:
+    def mapping_ids(self, user_ids: list, book_ids: list):
         # 替换原始数据中的user_id与book_id
         mapped_users = [self.user_id_map[user_id] for user_id in user_ids]
         mapped_works = [self.book_id_map[book_id] for book_id in book_ids]

@@ -45,8 +45,7 @@ class BaseDeepLearningSystem:
         pass
 
     '''top_k测试 基于预测结果的(全负)召回率与准确率测试'''
-    def test_top_k(self, min_rating_num: int = 200, k: int = 100, threshold: float = 4.5) -> tuple[
-        float, float, float]:
+    def test_top_k(self, min_rating_num: int = 200, k: int = 100, threshold: float = 4.5):
         """
         :param min_rating_num: 最小发表的评价数量
         :param k: 选取k个作为推荐(召回)结果
@@ -117,7 +116,7 @@ class BaseDeepLearningSystem:
         print(f"模型已保存, epoch={epoch + 1}")
 
 
-    def __get_train_and_test_dataloader__(self) -> tuple[DataLoader, DataLoader]:
+    def __get_train_and_test_dataloader__(self):
         """
         获取train + test dataloader
         :return: train_dataloader, test_dataloader
@@ -158,7 +157,7 @@ class BaseDeepLearningSystem:
         return dataloader
 
 
-    def  __get_id_mapping__(self) -> tuple[IdMapping, int, int, int]:
+    def __get_id_mapping__(self):
         """
         加载id映射关系
         :return: new_id_mapping, n_users, n_books, n_tags

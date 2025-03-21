@@ -17,7 +17,7 @@ from model_and_train.multi_feature_fm.mult_feature_fm import MultiFeatureFM
 class MultiFeatureFMSystem(BaseDeepLearningSystem):
     def __init__(self, bert_version, train_ratio=0.9, dim=80, lr=0.0001, batch_size=256, epochs=5,
                  params_saved_path=os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')),
-                                                'model_params', 'multif_feature_fm_model_adamW_mae_dim=80_epoch=20.pth')):
+                                                'model_params', 'multif_feature_fm_model_adamW_mae_dim=80_epoch=5.pth')):
         print('### 正在初始化MultiFeatureFM算法 ###')
         super().__init__(train_ratio, lr, batch_size, epochs, params_saved_path)
 
